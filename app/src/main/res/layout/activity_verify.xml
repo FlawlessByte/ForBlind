@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:src="@drawable/img_number_verification" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verify Your Number"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+            android:textColor="@color/grey_80"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_medium"
+            android:text="We have sent an OTP to your phone. Please enter the OTP!"
+            android:gravity="center"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
+            android:textColor="@color/grey_60" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_large"
+            android:layout_marginTop="@dimen/spacing_xlarge"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:enabled="false"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="+91"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:textColor="@color/grey_80" />
+
+            <View
+                android:layout_width="@dimen/spacing_medium"
+                android:layout_height="0dp" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Phone Number"
+                android:inputType="phone"
+                android:maxLines="1"
+                android:enabled="false"
+                android:id="@+id/phoneNumberField"
+                android:singleLine="true"
+                android:text="67 0587 7834"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:textColor="@color/grey_90"
+                android:textStyle="bold" >
+
+                <requestFocus/>
+
+            </com.google.android.material.textfield.TextInputEditText>
+
+        </LinearLayout>
+
+
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Enter OTP"
+            android:inputType="phone"
+            android:maxLines="1"
+            android:id="@+id/smsCodeField"
+            android:singleLine="true"
+            android:maxLength="6"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:textColor="@color/grey_90"
+            android:textStyle="bold" />
+
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_rounded_red"
+            android:text="VERIFY"
+            android:id="@+id/phoneVerifyContinue"
+            android:textColor="@android:color/white" />
+
+
+
+    </LinearLayout>
+
+</RelativeLayout>

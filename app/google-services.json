@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "322074554535",
+    "firebase_url": "https://blindly-1a5ef.firebaseio.com",
+    "project_id": "blindly-1a5ef",
+    "storage_bucket": "blindly-1a5ef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:322074554535:android:53f3b5cae449ec9ba7eb82",
+        "android_client_info": {
+          "package_name": "co.realinventor.forblind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "322074554535-ugkekmceuddh3jg6fi38hmqduvn5s05c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "co.realinventor.forblind",
+            "certificate_hash": "c3885a2b57143ebb7884468efc8d6a4ccccb1f22"
+          }
+        },
+        {
+          "client_id": "322074554535-ld9b4mi1q562ghsc9urvnr0s2ath1qkh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCseCu3rkd8CmEQBPNv01t6108LccA1zLE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "322074554535-ld9b4mi1q562ghsc9urvnr0s2ath1qkh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E8E9E4"
+    tools:context=".MessageActivity">
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/recyclerViewMsg"
+        android:layout_above="@+id/linearLayoutBottom"
+        android:clipToPadding="false"
+        android:layout_margin="8dp"
+        android:paddingBottom="@dimen/spacing_medium"
+        android:paddingTop="@dimen/spacing_medium"
+        android:scrollbars="vertical"
+        android:scrollingCache="true"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayoutBottom"
+        android:layout_alignParentBottom="true"
+        android:padding="@dimen/spacing_medium">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_small"
+            android:layout_weight="1"
+            app:cardBackgroundColor="@android:color/white"
+            android:backgroundTint="@color/white"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/spacing_xmlarge"
+                android:paddingLeft="@dimen/spacing_small"
+                android:paddingRight="@dimen/spacing_small"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/spacing_xmlarge"
+                    android:layout_height="@dimen/spacing_xmlarge"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:padding="@dimen/spacing_middle"
+                    android:tint="#00897B"
+                    app:srcCompat="@drawable/ic_sentiment_satisfied" />
+
+                <EditText
+                    android:id="@+id/editTextMsg"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Write a message..."
+                    android:imeOptions="actionSearch"
+                    android:padding="@dimen/spacing_middle" />
+
+                <ImageView
+                    android:layout_width="@dimen/spacing_xmlarge"
+                    android:layout_height="@dimen/spacing_xmlarge"
+                    android:id="@+id/imgAttachFile"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:padding="@dimen/spacing_middle"
+                    android:tint="#00897B"
+                    app:srcCompat="@drawable/ic_library_books_black_24dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_send_float"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_small"
+            android:clickable="true"
+            android:gravity="center"
+            android:tint="@android:color/white"
+            app:backgroundTint="#00897B"
+            app:elevation="1dp"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_mic"
+            app:useCompatPadding="false" />
+
+    </LinearLayout>
+
+</RelativeLayout>
