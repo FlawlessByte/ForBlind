@@ -6,6 +6,7 @@
     <dist:module dist:instant="true" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -14,7 +15,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MessageActivity"></activity>
+        <activity android:name=".Admin.AdminChatActivity"></activity>
+        <activity android:name=".Admin.AdminHomeActivity" />
+        <activity android:name=".Admin.AdminLoginActivity" />
+        <activity android:name=".MessageActivity" />
         <activity android:name=".VerifyActivity" />
         <activity
             android:name=".SignInActivity"

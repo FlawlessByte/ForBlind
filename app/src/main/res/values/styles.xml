@@ -23,4 +23,11 @@
         <item name="colorPrimary">@color/colorPrimary</item>
     </style>
 
+
+    <style name="EditText.Green" parent="@style/AppTheme">
+        <item name="colorControlActivated">@color/green_500</item>
+        <item name="colorControlHighlight">@color/green_500</item>
+        <item name="colorControlNormal">@color/green_400</item>
+    </style>
+
 </resources>

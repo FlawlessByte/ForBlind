@@ -2,7 +2,9 @@ package co.realinventor.forblind;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +12,8 @@ import android.view.View;
 import com.google.android.gms.auth.api.Auth;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import co.realinventor.forblind.Admin.AdminHomeActivity;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mFirebaseAuth;
@@ -22,6 +26,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+//        //Manage the signed in users
+//        SharedPreferences sharedPref = getSharedPreferences("USER", Context.MODE_PRIVATE);
+//        String user = sharedPref.getString("currentUser", ANONYMOUS);
+//        Log.d(TAG, "Current User : "+user);
+//
+//        if(user.equals("admin")){
+//            startActivity(new Intent(this, AdminHomeActivity.class));
+//            finish();
+//        }
 
 
         // Initialize Firebase Auth

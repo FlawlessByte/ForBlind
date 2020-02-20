@@ -1,4 +1,4 @@
-package co.realinventor.forblind;
+package co.realinventor.forblind.Admin;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,9 +44,11 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 import co.realinventor.forblind.Helpers.FriendlyMessage;
+import co.realinventor.forblind.Helpers.Student;
+import co.realinventor.forblind.R;
+import co.realinventor.forblind.SignInActivity;
 
-public class MessageActivity extends AppCompatActivity {
-
+public class AdminChatActivity extends AppCompatActivity {
     private static final String TAG = "MessageActivity";
     public static final String MESSAGES_CHILD = "messages";
     private static final int REQUEST_INVITE = 1;
@@ -58,22 +60,16 @@ public class MessageActivity extends AppCompatActivity {
     private String mUsername;
     private String mPhoneNo;
     private String mUid;
-    private String sender = "me";
+    private String sender = "admin";
     private SharedPreferences mSharedPreferences;
     private RecyclerView mMessageRecyclerView;
     private LinearLayoutManager mLinearLayoutManager;
     private EditText mMessageEditText;
     private ImageView mImageAttachFile;
-
     private FloatingActionButton fab_send;
-
-    // Firebase instance variables
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
     private DatabaseReference mFirebaseDatabaseReference;
     private FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder> mFirebaseAdapter;
-
-
+    private Student student;
     private final int CHAT_ME = 100;
     private final int CHAT_YOU = 200;
 
@@ -87,24 +83,12 @@ public class MessageActivity extends AppCompatActivity {
         // Set default username is anonymous.
         mUsername = ANONYMOUS;
 
-        // Initialize Firebase Auth
-        mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseUser = mFirebaseAuth.getCurrentUser();
-        if (mFirebaseUser == null) {
-            // Not signed in, launch the Sign In activity
-            startActivity(new Intent(this, SignInActivity.class));
-            finish();
-            return;
-        } else {
-            mUsername = mFirebaseUser.getDisplayName();
-            mPhoneNo = mFirebaseUser.getPhoneNumber();
-            mUid = mFirebaseUser.getUid();
-            Log.d(TAG, "Phone no : "+mPhoneNo);
-            Log.d(TAG, "UID : "+mUid);
-//            if (mFirebaseUser.getPhotoUrl() != null) {
-//                mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
-//            }
-        }
+        student = (Student) getIntent().getSerializableExtra("student");
+
+
+        mPhoneNo = student.getPhone();
+        mUid = student.getUid();
+
 
         mMessageRecyclerView = (RecyclerView) findViewById(R.id.recyclerViewMsg);
         mLinearLayoutManager = new LinearLayoutManager(this);
@@ -175,10 +159,10 @@ public class MessageActivity extends AppCompatActivity {
             public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 MessageViewHolder vh;
                 if (viewType == CHAT_ME) {
-                    View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_whatsapp_me, parent, false);
+                    View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_whatsapp_telegram_you, parent, false);
                     vh = new MessageViewHolder(v);
                 } else {
-                    View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_whatsapp_telegram_you, parent, false);
+                    View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_chat_whatsapp_me, parent, false);
                     vh = new MessageViewHolder(v);
                 }
                 return vh;
@@ -337,7 +321,7 @@ public class MessageActivity extends AppCompatActivity {
                                         String key = databaseReference.getKey();
                                         StorageReference storageReference =
                                                 FirebaseStorage.getInstance()
-                                                        .getReference(mFirebaseUser.getUid())
+                                                        .getReference(mUid)
                                                         .child(key)
                                                         .child(uri.getLastPathSegment());
 
@@ -354,13 +338,13 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     private void putImageInStorage(StorageReference storageReference, Uri uri, final String key) {
-        storageReference.putFile(uri).addOnCompleteListener(MessageActivity.this,
+        storageReference.putFile(uri).addOnCompleteListener(AdminChatActivity.this,
                 new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful()) {
                             task.getResult().getMetadata().getReference().getDownloadUrl()
-                                    .addOnCompleteListener(MessageActivity.this,
+                                    .addOnCompleteListener(AdminChatActivity.this,
                                             new OnCompleteListener<Uri>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Uri> task) {

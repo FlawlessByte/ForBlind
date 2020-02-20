@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
+import co.realinventor.forblind.Admin.AdminLoginActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
@@ -13,6 +15,7 @@ class SignInActivity : AppCompatActivity() {
     lateinit var editTextPhone : TextInputEditText
     lateinit var editTextNameRegister : TextInputEditText
     lateinit var buttonContinue : MaterialButton
+    lateinit var adminTextView : TextView
     val TAG = "SignInActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +25,7 @@ class SignInActivity : AppCompatActivity() {
         editTextPhone = findViewById(R.id.editTextPhoneNumber)
         editTextNameRegister = findViewById(R.id.editTextNameRegister)
         buttonContinue = findViewById(R.id.buttonContinuePhone)
+        adminTextView = findViewById(R.id.adminLoginText)
 
         buttonContinue.setOnClickListener {
             Log.d(TAG, "Continue Button clicked")
@@ -45,6 +49,13 @@ class SignInActivity : AppCompatActivity() {
             intent.putExtra("name", name)
             startActivity(intent)
 
+        }
+
+
+        adminTextView.setOnClickListener{
+            Log.d(TAG, "Admin login clicked!");
+            startActivity(Intent(this@SignInActivity, AdminLoginActivity::class.java))
+            finish()
         }
     }
 }

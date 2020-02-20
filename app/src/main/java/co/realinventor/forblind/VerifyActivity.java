@@ -184,7 +184,7 @@ public class VerifyActivity extends AppCompatActivity {
     private void addUserToDatabase(String uid){
         Log.d(TAG, "Adding user to firebase!");
 
-        Student student = new Student(uid, mName, phone);
+        Student student = new Student(uid, mName, countryCode+phone);
         mDatabase.child("users").child(uid).setValue(student)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

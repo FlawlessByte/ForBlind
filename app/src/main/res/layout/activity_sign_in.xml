@@ -15,31 +15,6 @@
         android:layout_centerInParent="true"
         android:orientation="vertical">
 
-<!--        <ImageView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_margin="20dp"-->
-<!--            android:src="@drawable/img_phone" />-->
-
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Enter Your Phone Number"-->
-<!--            android:layout_marginBottom="24dp"-->
-<!--            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"-->
-<!--            android:textColor="@color/grey_80"-->
-<!--            android:textStyle="bold" />-->
-
-<!--        <TextView-->
-<!--            android:layout_width="280dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="@dimen/spacing_medium"-->
-<!--            android:text="Please enter your 10 digit phone number to receive an One Time Password!"-->
-<!--            android:gravity="center"-->
-<!--            android:layout_marginBottom="24dp"-->
-<!--            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"-->
-<!--            android:textColor="@color/grey_60" />-->
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -115,9 +90,20 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:text="Continue"/>
 
+
+
     </LinearLayout>
 
-
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Login As Admin"
+        android:id="@+id/adminLoginText"
+        android:textStyle="bold"
+        android:textColor="@color/green_500"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:layout_margin="16dp"/>
 
 
 </RelativeLayout>

@@ -1,6 +1,8 @@
 package co.realinventor.forblind.Helpers
 
-class Student {
+import java.io.Serializable
+
+class Student : Serializable{
     lateinit var uid : String
     lateinit var name : String
     lateinit var phone : String
