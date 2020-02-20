@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseException;
@@ -23,10 +25,13 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.concurrent.TimeUnit;
+
+import co.realinventor.forblind.Helpers.Student;
 
 public class VerifyActivity extends AppCompatActivity {
     private TextInputEditText numberField, codeField;
@@ -36,14 +41,17 @@ public class VerifyActivity extends AppCompatActivity {
     private PhoneAuthProvider.ForceResendingToken mResendToken;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    private String mName;
+    private String phone;
+    private String countryCode = "+91";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify);
 
-        String countryCode = "+91";
-        String phone = getIntent().getStringExtra("phone");
+        phone = getIntent().getStringExtra("phone");
+        mName = getIntent().getStringExtra("name");
 
         numberField = findViewById(R.id.phoneNumberField);
         verifyButton = findViewById(R.id.phoneVerifyContinue);
@@ -152,8 +160,13 @@ public class VerifyActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Successful!", Toast.LENGTH_SHORT).show();
 
                             FirebaseUser user = task.getResult().getUser();
-                            startActivity(new Intent(VerifyActivity.this, MainActivity.class));
-                            finish();
+
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(mName)
+                                    .build();
+                            user.updateProfile(profileUpdates);
+
+                            addUserToDatabase(user.getUid());
 
                             // ...
                         } else {
@@ -166,6 +179,27 @@ public class VerifyActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void addUserToDatabase(String uid){
+        Log.d(TAG, "Adding user to firebase!");
+
+        Student student = new Student(uid, mName, phone);
+        mDatabase.child("users").child(uid).setValue(student)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Updating user success");
+                        startActivity(new Intent(VerifyActivity.this, MainActivity.class));
+                        finish();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "Updating user failed");
+            }
+        });
+
     }
 
 

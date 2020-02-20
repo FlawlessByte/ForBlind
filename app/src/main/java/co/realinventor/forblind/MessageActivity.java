@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,11 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.BitmapDrawableResource;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
@@ -48,7 +43,6 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
-
 import co.realinventor.forblind.Helpers.FriendlyMessage;
 
 public class MessageActivity extends AppCompatActivity {
@@ -225,8 +219,7 @@ public class MessageActivity extends AppCompatActivity {
         mMessageEditText = findViewById(R.id.editTextMsg);
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -238,8 +231,7 @@ public class MessageActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {
-            }
+            public void afterTextChanged(Editable editable) {}
         });
 
         fab_send.setOnClickListener(new View.OnClickListener() {
@@ -259,8 +251,6 @@ public class MessageActivity extends AppCompatActivity {
                 doFileAttachStuff();
             }
         });
-
-
     }
 
     private void doFileAttachStuff(){
@@ -326,7 +316,6 @@ public class MessageActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
     }
-
 
 
     @Override
