@@ -1,17 +1,22 @@
 package co.realinventor.forblind;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -21,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -43,6 +49,23 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+
 import co.realinventor.forblind.Helpers.FriendlyMessage;
 
 public class MessageActivity extends AppCompatActivity {
@@ -64,6 +87,7 @@ public class MessageActivity extends AppCompatActivity {
     private LinearLayoutManager mLinearLayoutManager;
     private EditText mMessageEditText;
     private ImageView mImageAttachFile;
+    private TextToSpeech tts;
 
     private FloatingActionButton fab_send;
 
@@ -131,11 +155,97 @@ public class MessageActivity extends AppCompatActivity {
 
         mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>(options) {
 
+
+            private String getTextFromFile(String filePath){
+                //Get the text file
+                File file = new File(filePath);
+
+                //Read text from file
+                StringBuilder text = new StringBuilder();
+
+                try {
+                    BufferedReader br = new BufferedReader(new FileReader(file));
+                    String line;
+
+                    while ((line = br.readLine()) != null) {
+                        text.append(line);
+                        text.append('\n');
+                    }
+                    br.close();
+                }
+                catch (IOException e) {
+                    //You'll need to add proper error handling here
+                    Log.d(TAG,"File read error");
+                }
+
+                return text.toString();
+            }
+
+
+            private void showAudioDialog(String filePath){
+                final String text = getTextFromFile(filePath);
+
+                tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int status) {
+                        if(status != TextToSpeech.ERROR) {
+                            tts.setLanguage(Locale.UK);
+                        }
+                    }
+                });
+
+                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+
+
+                //show some dialog
+
+
+                //show dialog
+//                new AlertDialog.Builder(getApplicationContext())
+//                        .setTitle("Delete entry")
+//                        .setMessage("Are you sure you want to delete this entry?")
+//
+//                        // Specifying a listener allows you to take an action before dismissing the dialog.
+//                        // The dialog is automatically dismissed when a dialog button is clicked.
+//                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                // Continue with delete operation
+//                            }
+//                        })
+//
+//                        // A null listener allows the button to dismiss the dialog and take no further action.
+//                        .setNegativeButton(android.R.string.no, null)
+//                        .setIcon(android.R.drawable.ic_dialog_alert)
+//                        .show();
+            }
+
             @Override
             protected void onBindViewHolder(@NonNull final MessageViewHolder viewHolder, int i, @NonNull FriendlyMessage friendlyMessage) {
                 if (friendlyMessage.getText() != null) {
+                    //There's a msg, display it
+                    Log.d(TAG, "Text not null");
                     viewHolder.contentTextView.setText(friendlyMessage.getText());
                 } else if (friendlyMessage.getFileUrl() != null) {
+                    Log.d(TAG, "File URL not null");
+                    //There's a file to show
+                    final String[] fileLoc = {""};
+                    viewHolder.linearLayoutMsg.setVisibility(View.GONE);
+                    viewHolder.linearLayoutAudio.setVisibility(View.VISIBLE);
+                    viewHolder.playButtonAudio.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Log.d(TAG, "Play audio button clicked!");
+                            if(fileLoc[0].equals(""))
+                                Log.d(TAG, "Filename null");
+                            else {
+                                Log.d(TAG, "Filename : " + fileLoc[0]);
+                                Log.d(TAG, "Do conversion");
+
+                                showAudioDialog(fileLoc[0]);
+                            }
+                        }
+                    });
+
                     String fileUrl = friendlyMessage.getFileUrl();
                     if (fileUrl.startsWith("gs://")) {
                         StorageReference storageReference = FirebaseStorage.getInstance()
@@ -145,9 +255,22 @@ public class MessageActivity extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Uri> task) {
                                         if (task.isSuccessful()) {
+                                            Log.d(TAG, "Got downloadable url");
                                             String downloadUrl = task.getResult().toString();
-                                            String fileName = downloadUrl.substring(downloadUrl.lastIndexOf('/') + 1);
-                                            viewHolder.contentTextView.setText(fileName);
+//                                            String fileName = downloadUrl.substring(downloadUrl.lastIndexOf('/') + 1);
+//                                            viewHolder.contentTextView.setText(fileName);
+
+                                            //download file
+
+                                            try {
+                                                fileLoc[0] = new DownloadFile().execute(downloadUrl).get();
+                                            } catch (ExecutionException e) {
+                                                e.printStackTrace();
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+
+
                                         } else {
                                             Log.w(TAG, "Getting download url was not successful.",
                                                     task.getException());
@@ -155,7 +278,20 @@ public class MessageActivity extends AppCompatActivity {
                                     }
                                 });
                     }
-                    viewHolder.imgViewFile.setVisibility(ImageView.VISIBLE);
+                    else{
+                        //download directly
+                        try {
+                            fileLoc[0] = new DownloadFile().execute(friendlyMessage.getFileUrl()).get();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+                else {
+                    Log.d(TAG, "Else?");
                 }
 
 
@@ -190,6 +326,7 @@ public class MessageActivity extends AppCompatActivity {
                 return options.getSnapshots().get(position).isFromMe() ? CHAT_ME : CHAT_YOU;
             }
         };
+
 
 
         mFirebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -272,7 +409,7 @@ public class MessageActivity extends AppCompatActivity {
 
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("application/pdf");
+        intent.setType("file/*");
         startActivityForResult(intent, REQUEST_IMAGE);
     }
 
@@ -283,15 +420,17 @@ public class MessageActivity extends AppCompatActivity {
         TextView contentTextView;
         ImageView statusImageView;
         TextView timeTextView;
-        ImageView imgViewFile;
-//        CircleImageView messengerImageView;
+        LinearLayout linearLayoutAudio, linearLayoutMsg;
+        ImageView playButtonAudio;
 
         public MessageViewHolder(View v) {
             super(v);
             contentTextView = (TextView) itemView.findViewById(R.id.text_content);
             timeTextView = (TextView) itemView.findViewById(R.id.text_time);
             statusImageView = (ImageView) itemView.findViewById(R.id.img_status);
-            imgViewFile = (ImageView) itemView.findViewById(R.id.imgViewFile);
+            linearLayoutAudio = (LinearLayout) itemView.findViewById(R.id.linearLayoutAudio);
+            linearLayoutMsg = (LinearLayout) itemView.findViewById(R.id.linearLayoutMsg);
+            playButtonAudio = (ImageView) itemView.findViewById(R.id.playButtonAudio);
         }
     }
 
@@ -380,4 +519,82 @@ public class MessageActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
+
+    private String getTimeString(){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd_M_yyyy_hh_mm_ss");
+        return  sdf.format(Calendar.getInstance().getTime());
+    }
+
+
+    class DownloadFile extends AsyncTask<String, String, String>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+            Log.d(TAG, "AsyncTask started");
+            int count;
+            String filePath = null;
+            try {
+                URL url = new URL(urls[0]);
+                URLConnection conection = url.openConnection();
+                conection.connect();
+
+                // this will be useful so that you can show a tipical 0-100%
+                // progress bar
+                int lenghtOfFile = conection.getContentLength();
+
+                // download the file
+                InputStream input = new BufferedInputStream(url.openStream(),
+                        8192);
+
+                filePath = Environment.getExternalStorageDirectory().toString()+"/Blindly/texts" + "/"+getTimeString()+".txt";
+
+                // Output stream
+                OutputStream output = new FileOutputStream(filePath);
+
+                byte data[] = new byte[1024];
+
+                long total = 0;
+
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    // publishing the progress....
+                    // After this onProgressUpdate will be called
+                    publishProgress("" + (int) ((total * 100) / lenghtOfFile));
+
+                    // writing data to file
+                    output.write(data, 0, count);
+                }
+
+                // flushing output
+                output.flush();
+
+                // closing streams
+                output.close();
+                input.close();
+
+            } catch (Exception e) {
+                Log.d(TAG, "AsyncTask Error");
+                Log.e("Error: ", e.getMessage());
+            }
+
+            Log.d(TAG, "AsyncTask ended");
+            Log.d(TAG, "AsyncTask File : "+filePath);
+
+            return filePath;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+    }
+
+
 }

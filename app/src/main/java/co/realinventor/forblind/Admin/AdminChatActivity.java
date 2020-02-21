@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -120,6 +121,16 @@ public class AdminChatActivity extends AppCompatActivity {
                 if (friendlyMessage.getText() != null) {
                     viewHolder.contentTextView.setText(friendlyMessage.getText());
                 } else if (friendlyMessage.getFileUrl() != null) {
+                    //There's a file to show
+                    viewHolder.linearLayoutMsg.setVisibility(View.GONE);
+                    viewHolder.linearLayoutAudio.setVisibility(View.VISIBLE);
+                    viewHolder.playButtonAudio.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Log.d(TAG, "Play audio button clicked!");
+                        }
+                    });
+
                     String fileUrl = friendlyMessage.getFileUrl();
                     if (fileUrl.startsWith("gs://")) {
                         StorageReference storageReference = FirebaseStorage.getInstance()
@@ -139,7 +150,6 @@ public class AdminChatActivity extends AppCompatActivity {
                                     }
                                 });
                     }
-                    viewHolder.imgViewFile.setVisibility(ImageView.VISIBLE);
                 }
 
 
@@ -267,15 +277,17 @@ public class AdminChatActivity extends AppCompatActivity {
         TextView contentTextView;
         ImageView statusImageView;
         TextView timeTextView;
-        ImageView imgViewFile;
-//        CircleImageView messengerImageView;
+        LinearLayout linearLayoutAudio, linearLayoutMsg;
+        ImageView playButtonAudio;
 
         public MessageViewHolder(View v) {
             super(v);
             contentTextView = (TextView) itemView.findViewById(R.id.text_content);
             timeTextView = (TextView) itemView.findViewById(R.id.text_time);
             statusImageView = (ImageView) itemView.findViewById(R.id.img_status);
-            imgViewFile = (ImageView) itemView.findViewById(R.id.imgViewFile);
+            linearLayoutAudio = (LinearLayout) itemView.findViewById(R.id.linearLayoutAudio);
+            linearLayoutMsg = (LinearLayout) itemView.findViewById(R.id.linearLayoutMsg);
+            playButtonAudio = (ImageView) itemView.findViewById(R.id.playButtonAudio);
         }
     }
 
