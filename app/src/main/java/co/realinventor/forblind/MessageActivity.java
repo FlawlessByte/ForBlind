@@ -194,7 +194,7 @@ public class MessageActivity extends AppCompatActivity {
                     @Override
                     public void onInit(int status) {
                         if(status != TextToSpeech.ERROR) {
-                            tts.setLanguage(Locale.UK);
+                            tts.setLanguage(Locale.US);
                             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
                             Log.d(TAG, "onInit");
                         }
@@ -247,7 +247,6 @@ public class MessageActivity extends AppCompatActivity {
                             else {
                                 Log.d(TAG, "Filename : " + fileLoc[0]);
                                 Log.d(TAG, "Do conversion");
-
                                 showAudioDialog(fileLoc[0]);
                             }
                         }

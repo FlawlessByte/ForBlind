@@ -5,13 +5,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -44,6 +48,23 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.obsez.android.lib.filechooser.ChooserDialog;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+
 import co.realinventor.forblind.Helpers.FriendlyMessage;
 import co.realinventor.forblind.Helpers.Student;
 import co.realinventor.forblind.R;
@@ -73,6 +94,7 @@ public class AdminChatActivity extends AppCompatActivity {
     private Student student;
     private final int CHAT_ME = 100;
     private final int CHAT_YOU = 200;
+    private TextToSpeech tts;
 
 
     @Override
@@ -116,18 +138,96 @@ public class AdminChatActivity extends AppCompatActivity {
 
         mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>(options) {
 
+
+            private String getTextFromFile(String filePath){
+                //Get the text file
+                File file = new File(filePath);
+
+                //Read text from file
+                StringBuilder text = new StringBuilder();
+
+                try {
+                    BufferedReader br = new BufferedReader(new FileReader(file));
+                    String line;
+
+                    while ((line = br.readLine()) != null) {
+                        text.append(line);
+                        text.append('\n');
+                    }
+                    br.close();
+                }
+                catch (IOException e) {
+                    //You'll need to add proper error handling here
+                    Log.d(TAG,"File read error");
+                }
+
+                Log.d(TAG, "Text To speech : "+text.toString());
+
+                return text.toString();
+
+            }
+
+
+            private void showAudioDialog(String filePath){
+                Log.d(TAG, "Text To Speech");
+                final String text = getTextFromFile(filePath);
+
+                tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int status) {
+                        if(status != TextToSpeech.ERROR) {
+                            tts.setLanguage(Locale.US);
+                            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+                            Log.d(TAG, "onInit");
+                        }
+                    }
+                });
+
+
+
+
+                //show some dialog
+
+
+                //show dialog
+//                new AlertDialog.Builder(getApplicationContext())
+//                        .setTitle("Delete entry")
+//                        .setMessage("Are you sure you want to delete this entry?")
+//
+//                        // Specifying a listener allows you to take an action before dismissing the dialog.
+//                        // The dialog is automatically dismissed when a dialog button is clicked.
+//                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                // Continue with delete operation
+//                            }
+//                        })
+//
+//                        // A null listener allows the button to dismiss the dialog and take no further action.
+//                        .setNegativeButton(android.R.string.no, null)
+//                        .setIcon(android.R.drawable.ic_dialog_alert)
+//                        .show();
+            }
+
             @Override
             protected void onBindViewHolder(@NonNull final MessageViewHolder viewHolder, int i, @NonNull FriendlyMessage friendlyMessage) {
                 if (friendlyMessage.getText() != null) {
                     viewHolder.contentTextView.setText(friendlyMessage.getText());
                 } else if (friendlyMessage.getFileUrl() != null) {
                     //There's a file to show
+                    final String[] fileLoc = {""};
                     viewHolder.linearLayoutMsg.setVisibility(View.GONE);
                     viewHolder.linearLayoutAudio.setVisibility(View.VISIBLE);
                     viewHolder.playButtonAudio.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Log.d(TAG, "Play audio button clicked!");
+                            if(fileLoc[0].equals(""))
+                                Log.d(TAG, "Filename null");
+                            else {
+                                Log.d(TAG, "Filename : " + fileLoc[0]);
+                                Log.d(TAG, "Do conversion");
+                                showAudioDialog(fileLoc[0]);
+                            }
                         }
                     });
 
@@ -140,9 +240,20 @@ public class AdminChatActivity extends AppCompatActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Uri> task) {
                                         if (task.isSuccessful()) {
+                                            Log.d(TAG, "Got downloadable url");
                                             String downloadUrl = task.getResult().toString();
-                                            String fileName = downloadUrl.substring(downloadUrl.lastIndexOf('/') + 1);
-                                            viewHolder.contentTextView.setText(fileName);
+//                                            String fileName = downloadUrl.substring(downloadUrl.lastIndexOf('/') + 1);
+//                                            viewHolder.contentTextView.setText(fileName);
+
+                                            //download file
+
+                                            try {
+                                                fileLoc[0] = new DownloadFile().execute(downloadUrl).get();
+                                            } catch (ExecutionException e) {
+                                                e.printStackTrace();
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
                                         } else {
                                             Log.w(TAG, "Getting download url was not successful.",
                                                     task.getException());
@@ -150,7 +261,21 @@ public class AdminChatActivity extends AppCompatActivity {
                                     }
                                 });
                     }
+                    else{
+                        //download directly
+                        try {
+                            fileLoc[0] = new DownloadFile().execute(friendlyMessage.getFileUrl()).get();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
+                else {
+                    Log.d(TAG, "Else?");
+                }
+
 
 
                 viewHolder.timeTextView.setText(friendlyMessage.getTimeInString());
@@ -264,10 +389,52 @@ public class AdminChatActivity extends AppCompatActivity {
             return;
         }
 
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("application/pdf");
-        startActivityForResult(intent, REQUEST_IMAGE);
+        new ChooserDialog(AdminChatActivity.this)
+                .withChosenListener(new ChooserDialog.Result() {
+                    @Override
+                    public void onChoosePath(String path, File pathFile) {
+                        if(pathFile != null){
+                            onFileChosen(pathFile);
+                        }
+                    }
+                })
+                // to handle the back key pressed or clicked outside the dialog:
+                .withOnCancelListener(new DialogInterface.OnCancelListener() {
+                    public void onCancel(DialogInterface dialog) {
+                        Log.d("CANCEL", "CANCEL");
+                        dialog.cancel(); // MUST have
+                    }
+                })
+                .build()
+                .show();
+    }
+
+    private void onFileChosen(File file){
+        final Uri uri = Uri.fromFile(file);
+        Log.d(TAG, "Uri: " + uri.toString());
+
+
+        FriendlyMessage tempMessage = new FriendlyMessage(null, sender, FriendlyMessage.getCurrentTime(), LOADING_IMAGE_URL);
+        mFirebaseDatabaseReference.child(MESSAGES_CHILD).child(mPhoneNo).push()
+                .setValue(tempMessage, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError,
+                                           DatabaseReference databaseReference) {
+                        if (databaseError == null) {
+                            String key = databaseReference.getKey();
+                            StorageReference storageReference =
+                                    FirebaseStorage.getInstance()
+                                            .getReference(mUid)
+                                            .child(key)
+                                            .child(uri.getLastPathSegment());
+
+                            putImageInStorage(storageReference, uri, key);
+                        } else {
+                            Log.w(TAG, "Unable to write message to database.",
+                                    databaseError.toException());
+                        }
+                    }
+                });
     }
 
 
@@ -375,5 +542,80 @@ public class AdminChatActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+
+    private String getTimeString(){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd_M_yyyy_hh_mm_ss");
+        return  sdf.format(Calendar.getInstance().getTime());
+    }
+
+
+    class DownloadFile extends AsyncTask<String, String, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+            Log.d(TAG, "AsyncTask started");
+            int count;
+            String filePath = null;
+            try {
+                URL url = new URL(urls[0]);
+                URLConnection conection = url.openConnection();
+                conection.connect();
+
+                // this will be useful so that you can show a tipical 0-100%
+                // progress bar
+                int lenghtOfFile = conection.getContentLength();
+
+                // download the file
+                InputStream input = new BufferedInputStream(url.openStream(),
+                        8192);
+
+                filePath = Environment.getExternalStorageDirectory().toString()+"/Blindly/texts" + "/"+getTimeString()+".txt";
+
+                // Output stream
+                OutputStream output = new FileOutputStream(filePath);
+
+                byte data[] = new byte[1024];
+
+                long total = 0;
+
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    // publishing the progress....
+                    // After this onProgressUpdate will be called
+                    publishProgress("" + (int) ((total * 100) / lenghtOfFile));
+
+                    // writing data to file
+                    output.write(data, 0, count);
+                }
+
+                // flushing output
+                output.flush();
+
+                // closing streams
+                output.close();
+                input.close();
+
+            } catch (Exception e) {
+                Log.d(TAG, "AsyncTask Error");
+                Log.e("Error: ", e.getMessage());
+            }
+
+            Log.d(TAG, "AsyncTask ended");
+            Log.d(TAG, "AsyncTask File : "+filePath);
+
+            return filePath;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
     }
 }
