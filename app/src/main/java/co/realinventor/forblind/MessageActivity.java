@@ -178,11 +178,15 @@ public class MessageActivity extends AppCompatActivity {
                     Log.d(TAG,"File read error");
                 }
 
+                Log.d(TAG, "Text To speech : "+text.toString());
+
                 return text.toString();
+
             }
 
 
             private void showAudioDialog(String filePath){
+                Log.d(TAG, "Text To Speech");
                 final String text = getTextFromFile(filePath);
 
                 tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
@@ -190,11 +194,13 @@ public class MessageActivity extends AppCompatActivity {
                     public void onInit(int status) {
                         if(status != TextToSpeech.ERROR) {
                             tts.setLanguage(Locale.UK);
+                            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+                            Log.d(TAG, "onInit");
                         }
                     }
                 });
 
-                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+
 
 
                 //show some dialog
@@ -407,7 +413,7 @@ public class MessageActivity extends AppCompatActivity {
             return;
         }
 
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("file/*");
         startActivityForResult(intent, REQUEST_IMAGE);
